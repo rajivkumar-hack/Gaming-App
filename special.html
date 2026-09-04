@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!--
+  ENTRY GATE: this page should only be reached by clicking through from
+  hs-gaming-landing.html. On a normal click-through it lets the page load;
+  on a refresh (or if someone opens this file directly/bookmarks it),
+  it sends the visitor back to the gaming page instead.
+  Replace the filename below if your gaming-page file is named differently —
+  both files need to be in the same folder.
+-->
+<script>
+  (function entryGate(){
+    var GAMING_PAGE = 'spin.html';
+    try {
+      if (sessionStorage.getItem('cameFromGame') === '1') {
+        sessionStorage.removeItem('cameFromGame'); // consume it — next refresh will gate again
+      } else {
+        window.location.replace(GAMING_PAGE);
+      }
+    } catch (e) { /* sessionStorage unavailable — just let the page load normally */ }
+  })();
+</script>
+
+<title>Happy Birthday — A Letter to My Universe</title>
+
+<!-- Fonts: Cormorant Garamond (display/romantic serif) + Jost (clean body sans) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          obsidian: '#0B0812',
+          velvet: '#1C1030',
+          velvet2: '#241636',
+          gold: '#D9A566',
+          goldlight: '#F0D9B5',
+          rose: '#E8A6A0',
+          cream: '#F6EFE4',
+        },
+        fontFamily: {
+          display: ['"Cormorant Garamond"', 'serif'],
+          body: ['"Jost"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<!-- GSAP (hero entrance + scroll reveals) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Confetti burst for the wish box -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<style>
+  :root{
+    --obsidian:#0B0812;
+    --velvet:#1C1030;
+    --velvet2:#241636;
+    --gold:#D9A566;
+    --goldlight:#F0D9B5;
+    --rose:#E8A6A0;
+    --cream:#F6EFE4;
+  }
+
+  *{ scroll-behavior:smooth; }
+
+  body{
+    background: radial-gradient(ellipse 120% 80% at 50% -10%, #2A1B45 0%, #150C24 45%, #0B0812 100%);
+    color: var(--cream);
+    font-family:'Jost', sans-serif;
+    font-weight:300;
+    overflow-x:hidden;
+  }
+
+  h1,h2,h3, .font-display{ font-family:'Cormorant Garamond', serif; }
+
+  /* thin gold scrollbar */
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-track{ background:var(--obsidian); }
+  ::-webkit-scrollbar-thumb{ background:linear-gradient(var(--gold), var(--rose)); border-radius:10px; }
+
+  /* Glassmorphism surface */
+  .glass{
+    background: rgba(246,239,228,0.045);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(240,217,181,0.14);
+  }
+  .glass-strong{
+    background: rgba(246,239,228,0.07);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(240,217,181,0.2);
+  }
+
+  /* Starfield canvas */
+  #starfield{
+    position:fixed; inset:0; width:100%; height:100%;
+    z-index:0; pointer-events:none;
+  }
+
+  .content-layer{ position:relative; z-index:10; }
+
+  /* soft glow accents */
+  .glow-orb{
+    position:absolute; border-radius:9999px; filter:blur(90px);
+    pointer-events:none; opacity:.35;
+  }
+
+  /* Divider */
+  .hairline{
+    height:1px;
+    background:linear-gradient(90deg, transparent, rgba(217,165,102,.5), transparent);
+  }
+
+  /* Timeline vertical line */
+  .timeline-line{
+    background:linear-gradient(180deg, transparent, var(--gold) 8%, var(--rose) 50%, var(--gold) 92%, transparent);
+  }
+  .timeline-node{
+    box-shadow:0 0 0 4px rgba(11,8,18,1), 0 0 22px rgba(217,165,102,.7);
+  }
+
+  /* Memory / timeline card hover */
+  .memory-card{ transition: transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s ease, border-color .5s ease; }
+  .memory-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px -20px rgba(217,165,102,.35);
+    border-color: rgba(240,217,181,.4);
+  }
+
+  /* Polaroid gallery */
+  .polaroid{
+    background:#fdfaf4;
+    padding:14px 14px 46px 14px;
+    border-radius:2px;
+    box-shadow: 0 20px 40px -12px rgba(0,0,0,.55);
+    transition: transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s ease;
+    cursor:pointer;
+  }
+  .polaroid:hover{ transform: translateY(-8px) rotate(0deg) scale(1.03); box-shadow:0 28px 50px -14px rgba(217,165,102,.4); z-index:5; }
+  .polaroid img{ display:block; width:100%; height:230px; object-fit:cover; }
+  .polaroid figcaption{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:#2b2018;
+    text-align:center;
+    margin-top:10px;
+    font-size:1rem;
+  }
+  .rot-1{ transform:rotate(-3deg); }
+  .rot-2{ transform:rotate(2.5deg); }
+  .rot-3{ transform:rotate(-1.5deg); }
+  .rot-4{ transform:rotate(3deg); }
+  .rot-5{ transform:rotate(-2deg); }
+  .rot-6{ transform:rotate(1.5deg); }
+
+  /* Play-icon overlay for video items in the gallery */
+  .polaroid{ position:relative; }
+  .video-play-badge{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:48px; height:48px; border-radius:9999px;
+    background:rgba(11,8,18,0.55); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    color:#F6EFE4; pointer-events:none;
+  }
+
+  /* Flip card for love letters */
+  .flip-scene{ perspective: 1600px; }
+  .flip-card{
+    position:relative; width:100%; height:100%;
+    transform-style:preserve-3d;
+    transition: transform .7s cubic-bezier(.22,1,.36,1);
+  }
+  .flip-card.flipped{ transform: rotateY(180deg); }
+  .flip-face{
+    position:absolute; inset:0;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border-radius:1.25rem;
+  }
+  .flip-back{ transform: rotateY(180deg); }
+
+  /* fade-up reveal (single, on-scroll, once) */
+  .reveal{ opacity:0; transform:translateY(28px); }
+
+  /* Music player disc spin */
+  @keyframes spin-slow{ to{ transform:rotate(360deg);} }
+  .disc-spin{ animation: spin-slow 6s linear infinite; }
+  .disc-paused{ animation-play-state: paused; }
+
+  /* marquee for song title */
+  .marquee-track{
+    display:inline-block; white-space:nowrap; padding-left:100%;
+    animation: marquee 9s linear infinite;
+  }
+  @keyframes marquee{ from{ transform:translateX(0);} to{ transform:translateX(-100%);} }
+
+  /* Wish button pulse */
+  @keyframes pulse-glow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(217,165,102,.55); }
+    50%{ box-shadow:0 0 0 22px rgba(217,165,102,0); }
+  }
+  .pulse-glow{ animation: pulse-glow 2.6s ease-out infinite; }
+
+  /* respect reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  input:focus-visible, button:focus-visible, a:focus-visible{
+    outline:2px solid var(--gold); outline-offset:3px;
+  }
+
+  /* ---------------- INTRO GATE (click & hold to burst) ---------------- */
+  #intro-gate{
+    position:fixed; inset:0; z-index:100;
+    background: radial-gradient(ellipse 120% 80% at 50% -10%, #2A1B45 0%, #150C24 45%, #0B0812 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:6vh 6vw;
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  #intro-gate.gate-hidden{ opacity:0; transform:scale(1.04); pointer-events:none; }
+  body.gate-locked{ overflow:hidden; height:100vh; }
+
+  .hold-dial{ position:relative; width:180px; height:180px; touch-action:none; user-select:none; -webkit-user-select:none; }
+  .hold-dial svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .hold-dial circle{ fill:none; stroke-width:4; }
+  .hold-track{ stroke: rgba(240,217,181,0.18); }
+  .hold-progress{
+    stroke: var(--gold);
+    stroke-linecap: round;
+    stroke-dasharray: 502.4; /* 2*PI*80 */
+    stroke-dashoffset: 502.4;
+    filter: drop-shadow(0 0 8px rgba(217,165,102,.7));
+  }
+  .hold-progress.charging{ transition: stroke-dashoffset 1.6s linear; stroke-dashoffset: 0; }
+  .hold-progress.releasing{ transition: stroke-dashoffset .5s ease-out; stroke-dashoffset: 502.4; }
+  .hold-dial-label{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:2px; cursor:pointer;
+  }
+  .hold-dial.pressed .hold-dial-label{ transform:scale(.94); }
+  .hold-dial-label{ transition: transform .2s ease; }
+  #gate-date{ letter-spacing:.06em; }
+</style>
+</head>
+
+<body class="bg-obsidian gate-locked">
+
+<!-- ======================================================= -->
+<!-- INTRO GATE — click & hold to burst into the site         -->
+<!-- ======================================================= -->
+<div id="intro-gate">
+  <div class="glow-orb w-[380px] h-[380px] bg-rose top-[-120px] left-[-140px] fixed"></div>
+  <div class="glow-orb w-[320px] h-[320px] bg-gold bottom-[-120px] right-[-120px] fixed"></div>
+
+  <div class="relative z-10">
+    <p id="gate-date" class="font-display italic text-2xl sm:text-4xl text-goldlight mb-2">
+      <!-- Replace date here to match your countdown target -->
+      September, 6
+    </p>
+    <p class="font-body text-sm sm:text-base text-cream/60 mb-8">
+      <!-- Replace Her Name Here -->
+      is Shruti's birthday
+    </p>
+
+    <h1 class="font-display italic font-medium text-[12vw] leading-[1.05] sm:text-6xl md:text-7xl bg-gradient-to-b from-cream via-goldlight to-gold bg-clip-text text-transparent mb-4">
+      Happy Birthday,<br class="hidden sm:block"> Shruti
+    </h1>
+
+    <p class="font-body font-light text-cream/60 max-w-sm mx-auto text-sm sm:text-base mb-10">
+      <!-- Replace gate subtitle here -->
+      A little site, made just for you. Hold the light below to open it.
+    </p>
+
+    <div class="hold-dial mx-auto" id="hold-dial">
+      <svg viewBox="0 0 180 180">
+        <circle class="hold-track" cx="90" cy="90" r="80"></circle>
+        <circle class="hold-progress" id="hold-progress" cx="90" cy="90" r="80"></circle>
+      </svg>
+      <div class="hold-dial-label">
+        <span class="font-display italic text-lg text-goldlight" id="hold-label">Hold</span>
+        <span class="font-body text-[10px] uppercase tracking-widest text-cream/40 mt-1">to open</span>
+      </div>
+    </div>
+
+    <p class="font-body text-[11px] uppercase tracking-widest text-cream/35 mt-8">
+      click &amp; hold to fill the light — release early and it fades back
+    </p>
+  </div>
+</div>
+
+<!-- ================= STARRY / GLOWING PARTICLE BACKGROUND ================= -->
+<canvas id="starfield"></canvas>
+<div class="glow-orb w-[520px] h-[520px] bg-rose top-[-120px] left-[-160px] fixed"></div>
+<div class="glow-orb w-[420px] h-[420px] bg-gold bottom-[-140px] right-[-140px] fixed"></div>
+
+<div class="content-layer">
+
+  <!-- ======================================================= -->
+  <!-- 1. HERO SECTION                                          -->
+  <!-- ======================================================= -->
+  <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 py-24">
+    <p id="hero-eyebrow" class="font-display italic text-lg sm:text-xl text-goldlight/90 mb-4 opacity-0">
+      <!-- Replace Her Name Here -->
+      for Shruti, always
+    </p>
+
+    <h1 id="hero-title" class="font-display italic font-medium text-[13vw] leading-[1.05] sm:text-7xl md:text-8xl bg-gradient-to-b from-cream via-goldlight to-gold bg-clip-text text-transparent opacity-0">
+      Happy Birthday,<br class="hidden sm:block"> My Universe
+    </h1>
+
+    <p id="hero-sub" class="font-body font-light text-cream/70 max-w-md sm:max-w-lg mt-6 text-base sm:text-lg opacity-0">
+      <!-- Replace hero subtitle here -->
+      Every orbit of the sun brings me back to the same certainty — that loving you is the best thing I do with my time.
+    </p>
+
+    <!-- Countdown / Time-together toggle -->
+    <div id="hero-timer" class="mt-12 opacity-0 w-full max-w-xl">
+      <div id="timer-label" class="font-body text-xs tracking-wide text-goldlight/70 mb-4"></div>
+      <div class="grid grid-cols-4 gap-2 sm:gap-4">
+        <div class="glass rounded-2xl px-2 py-4 sm:py-5">
+          <div id="t-days" class="font-display text-3xl sm:text-4xl text-goldlight">00</div>
+          <div class="text-[10px] sm:text-xs tracking-wide text-cream/50 mt-1">Days</div>
+        </div>
+        <div class="glass rounded-2xl px-2 py-4 sm:py-5">
+          <div id="t-hours" class="font-display text-3xl sm:text-4xl text-goldlight">00</div>
+          <div class="text-[10px] sm:text-xs tracking-wide text-cream/50 mt-1">Hours</div>
+        </div>
+        <div class="glass rounded-2xl px-2 py-4 sm:py-5">
+          <div id="t-mins" class="font-display text-3xl sm:text-4xl text-goldlight">00</div>
+          <div class="text-[10px] sm:text-xs tracking-wide text-cream/50 mt-1">Minutes</div>
+        </div>
+        <div class="glass rounded-2xl px-2 py-4 sm:py-5">
+          <div id="t-secs" class="font-display text-3xl sm:text-4xl text-goldlight">00</div>
+          <div class="text-[10px] sm:text-xs tracking-wide text-cream/50 mt-1">Seconds</div>
+        </div>
+      </div>
+      <button id="toggle-timer-mode" class="mt-5 text-xs text-cream/50 hover:text-gold underline underline-offset-4 decoration-gold/40 transition-colors font-body">
+        See how long we've been together instead
+      </button>
+    </div>
+
+    <a href="#journey" class="mt-16 flex flex-col items-center gap-2 text-cream/40 hover:text-gold transition-colors opacity-0" id="scroll-cue">
+      <span class="text-xs tracking-wide">our story</span>
+      <i data-lucide="chevron-down" class="w-4 h-4 animate-bounce"></i>
+    </a>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- 2. OUR JOURNEY — TIMELINE                                 -->
+  <!-- ======================================================= -->
+  <section id="journey" class="relative py-28 px-6 max-w-5xl mx-auto">
+    <div class="text-center mb-20 reveal">
+      <h2 class="font-display italic text-4xl sm:text-5xl text-cream">Our Story, So Far</h2>
+      <p class="text-cream/50 mt-3 max-w-md mx-auto text-sm">A handful of moments, out of thousands, that I keep closest.</p>
+    </div>
+
+    <div class="relative">
+      <!-- vertical line: left on mobile, centered on desktop -->
+      <div class="timeline-line absolute top-0 bottom-0 w-[2px] left-6 md:left-1/2 md:-translate-x-1/2"></div>
+
+      <div class="space-y-16" id="timeline-list">
+        <!-- Timeline items are injected below individually so left/right alternation is explicit -->
+
+        <!-- Item 1 -->
+        <div class="relative flex items-start md:items-center md:justify-start reveal">
+          <div class="timeline-node absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gold z-10"></div>
+          <div class="ml-16 md:ml-0 md:w-[calc(50%-3rem)] md:mr-auto md:pr-2">
+            <div class="memory-card glass rounded-2xl p-6 border border-transparent">
+              <div class="flex items-center gap-2 text-gold mb-2">
+                <i data-lucide="heart" class="w-4 h-4"></i>
+                <span class="text-xs tracking-wide text-goldlight/70"><!-- Replace date --> November 2021</span>
+              </div>
+              <h3 class="font-display text-2xl text-cream mb-1">The First Hello</h3>
+              <p class="text-cream/60 text-sm leading-relaxed"><!-- Replace memory text -->A crowded room, and somehow the only voice I could hear clearly was yours.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="relative flex items-start md:items-center md:justify-end reveal">
+          <div class="timeline-node absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose z-10"></div>
+          <div class="ml-16 md:ml-0 md:w-[calc(50%-3rem)] md:pl-2">
+            <div class="memory-card glass rounded-2xl p-6 border border-transparent">
+              <div class="flex items-center gap-2 text-gold mb-2">
+                <i data-lucide="coffee" class="w-4 h-4"></i>
+                <span class="text-xs tracking-wide text-goldlight/70">April 2022</span>
+              </div>
+              <h3 class="font-display text-2xl text-cream mb-1">The First Date</h3>
+              <p class="text-cream/60 text-sm leading-relaxed">Two coffees that went cold because we forgot to drink them — we were too busy talking.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="relative flex items-start md:items-center md:justify-start reveal">
+          <div class="timeline-node absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gold z-10"></div>
+          <div class="ml-16 md:ml-0 md:w-[calc(50%-3rem)] md:mr-auto md:pr-2">
+            <div class="memory-card glass rounded-2xl p-6 border border-transparent">
+              <div class="flex items-center gap-2 text-gold mb-2">
+                <i data-lucide="plane" class="w-4 h-4"></i>
+                <span class="text-xs tracking-wide text-goldlight/70">September 2023</span>
+              </div>
+              <h3 class="font-display text-2xl text-cream mb-1">Our First Trip Together</h3>
+              <p class="text-cream/60 text-sm leading-relaxed">Getting lost in a city neither of us could pronounce, and not minding at all.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="relative flex items-start md:items-center md:justify-end reveal">
+          <div class="timeline-node absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-rose z-10"></div>
+          <div class="ml-16 md:ml-0 md:w-[calc(50%-3rem)] md:pl-2">
+            <div class="memory-card glass rounded-2xl p-6 border border-transparent">
+              <div class="flex items-center gap-2 text-gold mb-2">
+                <i data-lucide="star" class="w-4 h-4"></i>
+                <span class="text-xs tracking-wide text-goldlight/70">December 2025</span>
+              </div>
+              <h3 class="font-display text-2xl text-cream mb-1">A Night We'll Never Forget</h3>
+              <p class="text-cream/60 text-sm leading-relaxed"><!-- Replace with your unforgettable moment -->Dancing in the kitchen at 1am for no reason at all — my favorite kind of memory.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="relative flex items-start md:items-center md:justify-start reveal">
+          <div class="timeline-node absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gold z-10"></div>
+          <div class="ml-16 md:ml-0 md:w-[calc(50%-3rem)] md:mr-auto md:pr-2">
+            <div class="memory-card glass rounded-2xl p-6 border border-transparent">
+              <div class="flex items-center gap-2 text-gold mb-2">
+                <i data-lucide="infinity" class="w-4 h-4"></i>
+                <span class="text-xs tracking-wide text-goldlight/70">Today</span>
+              </div>
+              <h3 class="font-display text-2xl text-cream mb-1">And Every Day After</h3>
+              <p class="text-cream/60 text-sm leading-relaxed">The story's still being written — and I intend to stay for every page.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- 3. MEMORY VAULT — PHOTO GALLERY                            -->
+  <!-- ======================================================= -->
+  <section id="gallery" class="relative py-28 px-6 max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <h2 class="font-display italic text-4xl sm:text-5xl text-cream">The Memory Vault</h2>
+      <p class="text-cream/50 mt-3 max-w-md mx-auto text-sm">Tap a photo to open it.</p>
+    </div>
+
+    <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 reveal">
+      <!--
+        ADD A PHOTO: copy one of these <figure> blocks.
+          - src        = your photo URL (or a local path like "photos/img1.jpg")
+          - data-caption = the line shown when it's opened
+
+        ADD A VIDEO: use the video figure at the bottom of this grid as a template.
+          - data-type="video" tells the gallery to treat it as a video
+          - the <img> stays as the thumbnail/poster shown in the grid
+          - data-video-src = your video file URL (or local path like "videos/clip1.mp4")
+      -->
+
+      <!-- Replace Image URL Here (each figure = one photo) -->
+      <figure class="polaroid rot-1" data-caption="The day you laughed so hard you had to sit down.">
+        <img src="us.jpeg" alt="Memory one — replace with your photo" loading="lazy">
+        <figcaption>April, somewhere sunny</figcaption>
+      </figure>
+      <figure class="polaroid rot-2" data-caption="You, mid-sentence, mid-laugh — my favorite combination.">
+        <img src="being.jpeg" alt="Memory two — replace with your photo" loading="lazy">
+        <figcaption>Just being us</figcaption>
+      </figure>
+      <figure class="polaroid rot-3" data-caption="Neither of us remembers what the joke was. Both of us remember how it felt.">
+        <img src="hum.jpg" alt="Memory three — replace with your photo" loading="lazy">
+        <figcaption>That weekend away</figcaption>
+      </figure>
+      <figure class="polaroid rot-4" data-caption="This is the face I fell for, seven times a day, every day.">
+        <img src="we.jpg" alt="Memory four — replace with your photo" loading="lazy">
+        <figcaption>Golden hour, always</figcaption>
+      </figure>
+
+      <!-- VIDEO — replace data-video-src, the poster image, and the caption -->
+      <figure class="polaroid rot-5" data-type="video" data-video-src="always.mp4" data-caption="The clip where you couldn't stop laughing.">
+        <img src="https://ih1.redbubble.net/image.5898039534.2063/fposter,small,wall_texture,product,750x1000.2.jpg" alt="Memory video — replace poster image" loading="lazy">
+        <span class="video-play-badge"><i data-lucide="play" class="w-5 h-5 translate-x-[1px]"></i></span>
+        <figcaption>Watch this one</figcaption>
+      </figure>
+
+      <figure class="polaroid rot-6" data-caption="Here's to a hundred more birthdays exactly like this one.">
+        <img src="this.jpg" alt="Memory six — replace with your photo" loading="lazy">
+        <figcaption>Here's to more of this</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-obsidian/90 backdrop-blur-md px-6">
+    <button id="lightbox-close" class="absolute top-6 right-6 text-cream/70 hover:text-gold transition-colors">
+      <i data-lucide="x" class="w-7 h-7"></i>
+    </button>
+    <div class="max-w-lg w-full text-center">
+      <img id="lightbox-img" src="" alt="" class="w-full max-h-[65vh] object-cover rounded-lg shadow-2xl">
+      <video id="lightbox-video" controls playsinline class="w-full max-h-[65vh] rounded-lg shadow-2xl hidden"></video>
+      <button id="lightbox-video-hint" class="hidden mt-3 mx-auto flex items-center gap-2 glass rounded-full px-5 py-2 text-sm text-goldlight hover:text-gold transition-colors">
+        <i data-lucide="volume-2" class="w-4 h-4"></i> Tap to play with sound
+      </button>
+      <p id="lightbox-caption" class="font-display italic text-xl sm:text-2xl text-goldlight mt-6"></p>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- 4. LOVE LETTERS — REASONS WHY                             -->
+  <!-- ======================================================= -->
+  <section id="letters" class="relative py-28 px-6 max-w-3xl mx-auto text-center">
+    <div class="mb-14 reveal">
+      <h2 class="font-display italic text-4xl sm:text-5xl text-cream">Reasons, In No Particular Order</h2>
+      <p class="text-cream/50 mt-3 max-w-md mx-auto text-sm">Click the card to open it. There's a new one waiting each time.</p>
+    </div>
+
+    <div class="flex flex-col items-center reveal">
+      <div class="flip-scene w-full max-w-sm h-72 sm:h-80" id="flip-scene">
+        <div class="flip-card" id="flip-card">
+          <!-- Front -->
+          <div class="flip-face glass-strong rounded-3xl flex flex-col items-center justify-center p-8 cursor-pointer" id="flip-front">
+            <i data-lucide="mail" class="w-8 h-8 text-gold mb-4"></i>
+            <p class="font-display italic text-2xl text-cream/90">A little envelope,<br>just for you</p>
+            <p class="text-cream/40 text-xs mt-4 tracking-wide">tap to open</p>
+          </div>
+          <!-- Back -->
+          <div class="flip-face flip-back glass-strong rounded-3xl flex items-center justify-center p-8 sm:p-10 cursor-pointer" id="flip-back">
+            <p id="letter-text" class="font-display italic text-xl sm:text-2xl leading-relaxed text-goldlight"><!-- reasons populated by JS --></p>
+          </div>
+        </div>
+      </div>
+
+      <button id="next-letter" class="mt-8 font-body text-sm text-cream/60 hover:text-gold transition-colors flex items-center gap-2">
+        Reveal another reason
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- 5. THE FINAL SURPRISE — WISH BOX                          -->
+  <!-- ======================================================= -->
+  <section id="wish" class="relative py-32 px-6 text-center">
+    <div class="max-w-lg mx-auto reveal">
+      <i data-lucide="sparkles" class="w-8 h-8 text-gold mx-auto mb-6"></i>
+      <h2 class="font-display italic text-4xl sm:text-5xl text-cream mb-4">One Last Thing</h2>
+      <p class="text-cream/60 text-sm sm:text-base mb-12">Close your eyes, make a wish, and click below. I already know mine — it's you, every year.</p>
+
+      <button id="wish-btn" class="pulse-glow relative inline-flex items-center gap-3 rounded-full px-10 py-5 font-display italic text-xl bg-gradient-to-r from-gold via-goldlight to-rose text-obsidian font-medium shadow-2xl hover:scale-105 active:scale-95 transition-transform">
+        <i data-lucide="wand-2" class="w-5 h-5"></i>
+        Click to Make a Birthday Wish
+      </button>
+    </div>
+  </section>
+
+  <!-- Wish modal -->
+  <div id="wish-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-obsidian/90 backdrop-blur-md px-6">
+    <div class="glass-strong rounded-3xl max-w-md w-full p-10 text-center relative">
+      <button id="wish-modal-close" class="absolute top-5 right-5 text-cream/60 hover:text-gold transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <i data-lucide="party-popper" class="w-9 h-9 text-gold mx-auto mb-5"></i>
+      <h3 class="font-display italic text-3xl text-goldlight mb-4">Happy Birthday, My Love</h3>
+      <!-- Replace final heartfelt message here -->
+      <p class="text-cream/70 text-sm sm:text-base leading-relaxed">
+        Whatever you wished for, I hope it finds you. And if it didn't come true today,
+        I'll spend the rest of the year helping it happen — that's a promise, not a birthday card line.
+        I love you more than any of these words manage to say.
+      </p>
+      <p class="font-display italic text-goldlight mt-6"><!-- Replace signature --> — Always yours</p>
+    </div>
+  </div>
+
+  <!-- Birthday celebration popup — auto-triggers once the countdown hits her birthday, then every minute -->
+  <div id="birthday-popup" class="fixed inset-0 z-50 hidden items-center justify-center bg-obsidian/90 backdrop-blur-md px-6">
+    <div class="glass-strong rounded-3xl max-w-md w-full p-10 text-center relative">
+      <button id="birthday-popup-close" class="absolute top-5 right-5 text-cream/60 hover:text-gold transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <i data-lucide="cake" class="w-9 h-9 text-gold mx-auto mb-5"></i>
+      <h3 class="font-display italic text-3xl text-goldlight mb-4">It's Your Day, Shruti!</h3>
+      <!-- Replace this celebration message here -->
+      <p class="text-cream/70 text-sm sm:text-base leading-relaxed">
+        Happy Birthday! The countdown's over, and today is officially all about you.
+        Go explore the whole site again — every page is a little louder today. 🎂
+      </p>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- FOOTER                                                    -->
+  <!-- ======================================================= -->
+  <footer class="relative py-12 px-6 text-center">
+    <div class="hairline max-w-xs mx-auto mb-6"></div>
+    <p class="text-cream/30 text-xs font-body tracking-wide">
+      made with love, for <!-- Replace Her Name Here -->Shruti · <span id="footer-year"></span>
+    </p>
+  </footer>
+
+</div><!-- /content-layer -->
+
+<!-- ======================================================= -->
+<!-- FLOATING MUSIC PLAYER WIDGET (Spotify official embed)     -->
+<!-- ======================================================= -->
+<!--
+  SPOTIFY SETUP:
+  1. Find your song on Spotify (open.spotify.com), click "..." -> Share -> Copy Song Link.
+     e.g. https://open.spotify.com/track/3gixnmepHSsyAuho34rprN
+  2. The part after "/track/" is the track ID — paste it into the src URL below,
+     replacing the ID that's already there.
+  This uses Spotify's own player, so play/pause, progress, and volume all work natively —
+  no extra JavaScript needed, and it won't run into YouTube's "embedding disabled" issue.
+-->
+<div id="music-player" class="fixed bottom-5 right-5 z-40 rounded-2xl overflow-hidden shadow-2xl" style="width:260px; max-width:78vw;">
+  <iframe
+    style="border-radius:16px"
+    src="https://open.spotify.com/embed/track/3gixnmepHSsyAuho34rprN?utm_source=generator&theme=0"
+    width="100%" height="80" frameborder="0" loading="lazy"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+  </iframe>
+</div>
+
+<script>
+  lucide.createIcons();
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  /* ============ SHARED GOLD/ROSE CONFETTI BURST ============ */
+  window.fireGoldConfetti = function fireGoldConfetti(){
+    if (!window.confetti) return;
+    const colors = ['#D9A566', '#F0D9B5', '#E8A6A0', '#F6EFE4'];
+    confetti({ particleCount: 100, spread: 80, startVelocity: 50, origin: { y: 0.55 }, colors });
+    setTimeout(() => confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0 }, colors }), 200);
+    setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1 }, colors }), 200);
+  };
+
+  /* ============ INTRO GATE — click & hold to burst ============ */
+  (function introGate(){
+    const gate = document.getElementById('intro-gate');
+    const dial = document.getElementById('hold-dial');
+    const ring = document.getElementById('hold-progress');
+    const label = document.getElementById('hold-label');
+    const HOLD_MS = 1600;
+    let holdTimer = null;
+    let completed = false;
+
+    function fireGateConfetti(){
+      if (!window.confetti) return;
+      const colors = ['#D9A566', '#F0D9B5', '#E8A6A0', '#F6EFE4'];
+      confetti({ particleCount: 130, spread: 90, startVelocity: 55, origin: { y: 0.5 }, colors });
+      setTimeout(() => confetti({ particleCount: 70, angle: 60, spread: 65, origin: { x: 0, y: 0.6 }, colors }), 150);
+      setTimeout(() => confetti({ particleCount: 70, angle: 120, spread: 65, origin: { x: 1, y: 0.6 }, colors }), 150);
+    }
+
+    function openSite(){
+      if (completed) return;
+      completed = true;
+      fireGateConfetti();
+      label.textContent = 'Yay';
+      setTimeout(() => {
+        gate.classList.add('gate-hidden');
+        document.body.classList.remove('gate-locked');
+        setTimeout(() => { gate.style.display = 'none'; }, 850);
+      }, 350);
+    }
+
+    function startHold(){
+      if (completed) return;
+      dial.classList.add('pressed');
+      ring.classList.remove('releasing');
+      void ring.offsetWidth; // restart the fill transition cleanly
+      ring.classList.add('charging');
+      label.textContent = 'Holding…';
+      holdTimer = setTimeout(openSite, HOLD_MS);
+    }
+
+    function cancelHold(){
+      if (completed) return;
+      dial.classList.remove('pressed');
+      clearTimeout(holdTimer);
+      ring.classList.remove('charging');
+      ring.classList.add('releasing');
+      label.textContent = 'Hold';
+    }
+
+    dial.addEventListener('pointerdown', startHold);
+    dial.addEventListener('pointerup', cancelHold);
+    dial.addEventListener('pointerleave', cancelHold);
+    dial.addEventListener('pointercancel', cancelHold);
+    dial.setAttribute('tabindex', '0');
+    dial.setAttribute('role', 'button');
+    dial.setAttribute('aria-label', 'Hold to open the site');
+    dial.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !completed) { e.preventDefault(); openSite(); }
+    });
+  })();
+
+  /* ============ STARFIELD PARTICLES ============ */
+  (function starfield(){
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let w, h, stars = [];
+    const STAR_COUNT = 160;
+
+    function resize(){
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    function makeStars(){
+      stars = Array.from({length: STAR_COUNT}, () => ({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        r: Math.random()*1.4 + 0.3,
+        baseAlpha: Math.random()*0.6 + 0.2,
+        twinkleSpeed: Math.random()*0.02 + 0.005,
+        phase: Math.random()*Math.PI*2,
+        drift: (Math.random()-0.5)*0.05,
+      }));
+    }
+    function draw(t){
+      ctx.clearRect(0,0,w,h);
+      for(const s of stars){
+        const alpha = s.baseAlpha + Math.sin(t*s.twinkleSpeed + s.phase) * 0.3;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(240,217,181,${Math.max(0, alpha)})`;
+        ctx.fill();
+        s.y += s.drift;
+        if(s.y > h) s.y = 0;
+        if(s.y < 0) s.y = h;
+      }
+      requestAnimationFrame(draw);
+    }
+    resize(); makeStars();
+    window.addEventListener('resize', () => { resize(); makeStars(); });
+    requestAnimationFrame(draw);
+  })();
+
+  /* ============ COUNTDOWN / TIME-TOGETHER TIMER ============ */
+  (function timer(){
+    // --- Replace Birthday Date Here (month is 0-indexed: 0=Jan ... 11=Dec) ---
+    const BIRTHDAY_MONTH = 8; // September  <- Replace month here
+    const BIRTHDAY_DAY = 6;   // 6th        <- Replace day here
+
+    function nextBirthday(){
+      const now = new Date();
+      let target = new Date(now.getFullYear(), BIRTHDAY_MONTH, BIRTHDAY_DAY, 0, 0, 0);
+      if (target < now) target = new Date(now.getFullYear()+1, BIRTHDAY_MONTH, BIRTHDAY_DAY, 0, 0, 0);
+      return target;
+    }
+    function isBirthdayToday(){
+      const now = new Date();
+      return now.getMonth() === BIRTHDAY_MONTH && now.getDate() === BIRTHDAY_DAY;
+    }
+    // --- Replace "Together Since" Date Here ---
+    const TOGETHER_SINCE = new Date(2021, 10, 8); // November 8, 2021 <- Replace here
+
+    let mode = 'countdown'; // 'countdown' | 'together'
+    const label = document.getElementById('timer-label');
+    const toggleBtn = document.getElementById('toggle-timer-mode');
+    const elDays = document.getElementById('t-days');
+    const elHours = document.getElementById('t-hours');
+    const elMins = document.getElementById('t-mins');
+    const elSecs = document.getElementById('t-secs');
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function tick(){
+      const now = new Date();
+      let diff;
+      if(mode === 'countdown'){
+        diff = nextBirthday() - now;
+        label.textContent = isBirthdayToday() ? "It's her birthday today!" : "Counting down to your birthday";
+      } else {
+        diff = now - TOGETHER_SINCE;
+        label.textContent = "Time we've shared, and counting";
+      }
+      diff = Math.max(0, diff);
+      const days = Math.floor(diff / (1000*60*60*24));
+      const hours = Math.floor((diff / (1000*60*60)) % 24);
+      const mins = Math.floor((diff / (1000*60)) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+      elDays.textContent = pad(days);
+      elHours.textContent = pad(hours);
+      elMins.textContent = pad(mins);
+      elSecs.textContent = pad(secs);
+    }
+    toggleBtn.addEventListener('click', () => {
+      mode = mode === 'countdown' ? 'together' : 'countdown';
+      toggleBtn.textContent = mode === 'countdown'
+        ? "See how long we've been together instead"
+        : "Switch back to the birthday countdown";
+      tick();
+    });
+    tick();
+    setInterval(tick, 1000);
+
+    /* ---- Birthday-arrival celebration: first popup on open, then every 1 min ---- */
+    (function birthdayCelebration(){
+      const popup = document.getElementById('birthday-popup');
+      const closeBtn = document.getElementById('birthday-popup-close');
+      let started = false;
+
+      function openPopup(){
+        window.fireGoldConfetti();
+        popup.classList.remove('hidden');
+        popup.classList.add('flex');
+      }
+      function closePopup(){
+        popup.classList.add('hidden');
+        popup.classList.remove('flex');
+      }
+      closeBtn.addEventListener('click', closePopup);
+      popup.addEventListener('click', (e) => { if (e.target === popup) closePopup(); });
+
+      function startCelebrating(){
+        if (started) return;
+        started = true;
+        openPopup();                              // fires the moment the birthday is reached / page opened on the day
+        setInterval(openPopup, 60 * 1000);          // then bursts again every 1 minute
+      }
+
+      // Check once now, and keep checking every second in case the clock crosses into the birthday while the page is open
+      setInterval(() => { if (isBirthdayToday()) startCelebrating(); }, 1000);
+      if (isBirthdayToday()) startCelebrating();
+    })();
+  })();
+
+
+
+  /* ============ HERO ENTRANCE (single orchestrated sequence) ============ */
+  window.addEventListener('load', () => {
+    gsap.timeline({defaults:{ease:'power3.out'}})
+      .to('#hero-eyebrow', {opacity:1, y:0, duration:.8}, 0.1)
+      .fromTo('#hero-title', {opacity:0, y:24}, {opacity:1, y:0, duration:1.1}, 0.35)
+      .fromTo('#hero-sub', {opacity:0, y:16}, {opacity:1, y:0, duration:.9}, 0.75)
+      .fromTo('#hero-timer', {opacity:0, y:16}, {opacity:1, y:0, duration:.9}, 1.0)
+      .fromTo('#scroll-cue', {opacity:0}, {opacity:1, duration:.8}, 1.4);
+  });
+
+  /* ============ SCROLL REVEALS ============ */
+  gsap.registerPlugin(ScrollTrigger);
+  document.querySelectorAll('.reveal').forEach((el) => {
+    gsap.to(el, {
+      opacity:1, y:0, duration:.9, ease:'power3.out',
+      scrollTrigger:{ trigger: el, start:'top 85%', once:true }
+    });
+  });
+
+  /* ============ GALLERY LIGHTBOX ============ */
+  (function gallery(){
+    const grid = document.getElementById('gallery-grid');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const lbVideo = document.getElementById('lightbox-video');
+    const lbVideoHint = document.getElementById('lightbox-video-hint');
+    const lbCap = document.getElementById('lightbox-caption');
+    const closeBtn = document.getElementById('lightbox-close');
+
+    grid.querySelectorAll('.polaroid').forEach(fig => {
+      fig.addEventListener('click', () => {
+        const isVideo = fig.dataset.type === 'video';
+        lbCap.textContent = fig.dataset.caption || '';
+        if (isVideo){
+          lbVideo.src = fig.dataset.videoSrc || '';
+          lbVideo.muted = false;
+          lbVideo.volume = 1;
+          lbVideo.classList.remove('hidden');
+          lbImg.classList.add('hidden');
+          lbVideoHint.classList.add('hidden');
+          lbVideo.play().catch(() => {
+            // Autoplay-with-sound was blocked — show a tap-to-play hint instead of failing silently
+            lbVideoHint.classList.remove('hidden');
+          });
+        } else {
+          const img = fig.querySelector('img');
+          lbImg.src = img.src;
+          lbImg.alt = img.alt;
+          lbImg.classList.remove('hidden');
+          lbVideo.classList.add('hidden');
+          lbVideoHint.classList.add('hidden');
+        }
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+      });
+    });
+    lbVideoHint.addEventListener('click', () => {
+      lbVideo.muted = false;
+      lbVideo.play().then(() => lbVideoHint.classList.add('hidden')).catch(() => {});
+    });
+    function close(){
+      lightbox.classList.add('hidden');
+      lightbox.classList.remove('flex');
+      lbVideo.pause();
+      lbVideo.removeAttribute('src');
+      lbVideo.load();
+    }
+    closeBtn.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => { if(e.target === lightbox) close(); });
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape') close(); });
+  })();
+
+  /* ============ LOVE LETTERS FLIP DECK ============ */
+  (function letters(){
+    // --- Replace / add your own reasons here ---
+    const reasons = [
+      "The way you laugh at your own jokes before you even finish telling them.",
+      "How you turn an ordinary Tuesday into something worth remembering.",
+      "The quiet way you take care of everyone around you, and rarely of yourself.",
+      "Your relentless curiosity — you still ask “why” like it's the best question in the world.",
+      "How safe I feel, just hearing your voice at the end of a long day.",
+      "Simply — all of you. Every version I've met, and every one I haven't yet.",
+    ];
+    let index = 0;
+    const card = document.getElementById('flip-card');
+    const front = document.getElementById('flip-front');
+    const back = document.getElementById('flip-back');
+    const text = document.getElementById('letter-text');
+    const nextBtn = document.getElementById('next-letter');
+
+    text.textContent = reasons[0];
+
+    function flip(){ card.classList.toggle('flipped'); }
+    front.addEventListener('click', flip);
+    back.addEventListener('click', flip);
+
+    nextBtn.addEventListener('click', () => {
+      index = (index + 1) % reasons.length;
+      if(!card.classList.contains('flipped')){
+        flip();
+        setTimeout(() => { text.textContent = reasons[index]; }, 350);
+      } else {
+        text.textContent = reasons[index];
+        setTimeout(() => flip(), 50);
+        setTimeout(() => flip(), 900);
+      }
+    });
+  })();
+
+  /* Music now plays via Spotify's official embedded player (see the iframe in the
+     floating widget above) — it handles its own play/pause UI natively, so no
+     custom JavaScript is needed here anymore. */
+
+  /* ============ WISH BOX — CONFETTI + POPUP ============ */
+  (function wishBox(){
+    const btn = document.getElementById('wish-btn');
+    const modal = document.getElementById('wish-modal');
+    const closeBtn = document.getElementById('wish-modal-close');
+
+    function burstConfetti(){
+      const colors = ['#D9A566', '#F0D9B5', '#E8A6A0', '#F6EFE4'];
+      confetti({ particleCount: 90, spread: 75, startVelocity: 45, origin: { y: 0.65 }, colors });
+      setTimeout(() => confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0 }, colors }), 200);
+      setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1 }, colors }), 200);
+    }
+
+    btn.addEventListener('click', () => {
+      burstConfetti();
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    });
+    function close(){
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', (e) => { if(e.target === modal) close(); });
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape') close(); });
+  })();
+</script>
+</body>
+</html>

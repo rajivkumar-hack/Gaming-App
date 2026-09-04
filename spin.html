@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HS Gaming — Play Games, Win Real Cash</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:    '#0F1115',
+          panel:  '#171A21',
+          panel2: '#1E222B',
+          green:  '#22C55E',
+          greenlight: '#86EFAC',
+          gold:   '#FFD166',
+          violet: '#7C5CFC',
+        },
+        fontFamily: {
+          display: ['"Sora"', 'sans-serif'],
+          body: ['"Inter"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<style>
+  :root{ --green:#22C55E; --gold:#FFD166; --violet:#7C5CFC; }
+  *{ scroll-behavior:smooth; }
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(124,92,252,0.18), transparent 45%),
+      radial-gradient(circle at 100% 20%, rgba(34,197,94,0.14), transparent 40%),
+      #0F1115;
+    color:#F4F5F7;
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.font-display{ font-family:'Sora', sans-serif; }
+
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:#0F1115; }
+  ::-webkit-scrollbar-thumb{ background:linear-gradient(var(--green), var(--violet)); border-radius:10px; }
+
+  .card{ background: linear-gradient(180deg, #1E222B, #171A21); border:1px solid rgba(255,255,255,0.06); }
+  .card:hover{ border-color: rgba(34,197,94,0.35); }
+
+  .glow-orb{ position:absolute; border-radius:9999px; filter:blur(100px); pointer-events:none; opacity:.28; }
+
+  .btn-primary{
+    background: linear-gradient(90deg, var(--green), #16A34A);
+    color:#08130C; font-weight:700;
+    box-shadow: 0 10px 30px -8px rgba(34,197,94,0.55);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .btn-primary:hover{ transform: translateY(-2px); box-shadow: 0 14px 34px -8px rgba(34,197,94,0.7); }
+
+  .btn-ghost{
+    background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .btn-ghost:hover{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.28); }
+
+  .badge-pill{ background: rgba(255,209,102,0.12); border:1px solid rgba(255,209,102,0.35); color: var(--gold); }
+
+  @keyframes float-y{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-14px);} }
+  .float{ animation: float-y 5s ease-in-out infinite; }
+
+  .phone-mock{
+    width: min(78vw, 300px); aspect-ratio: 9/18.5;
+    border-radius: 34px; border:8px solid #262A34;
+    background: linear-gradient(160deg, #14202B, #0B1420 60%);
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,0.04);
+    position:relative; overflow:hidden;
+  }
+  .phone-notch{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:38%; height:22px; background:#262A34; border-radius:0 0 14px 14px; }
+
+  .stat-num{ font-family:'Sora', sans-serif; font-weight:800; }
+
+  .faq-item[open] summary .chev{ transform: rotate(180deg); }
+  summary::-webkit-details-marker{ display:none; }
+  summary{ cursor:pointer; list-style:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--green); outline-offset:3px; }
+</style>
+</head>
+
+<body class="bg-ink">
+
+<div class="glow-orb w-[420px] h-[420px] bg-violet top-[-140px] left-[-120px] fixed"></div>
+<div class="glow-orb w-[420px] h-[420px] bg-green bottom-[-160px] right-[-140px] fixed"></div>
+
+<!-- ================= NAV ================= -->
+<nav class="sticky top-0 z-50 bg-ink/80 backdrop-blur-md border-b border-white/5">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <!-- Replace Logo Here — currently just the text "HS" -->
+    <a href="#top" class="font-display font-extrabold text-2xl tracking-tight">
+      HS <span class="text-green">Gaming</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+      <a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a>
+      <a href="#games" class="hover:text-white transition-colors">Games</a>
+      <a href="#rewards" class="hover:text-white transition-colors">Rewards</a>
+      <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+    </div>
+    <!-- Replace Download Link Here -->
+    <a href="#" class="redirect-btn btn-primary rounded-full px-5 py-2.5 text-sm">Play Now</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section id="top" class="relative max-w-6xl mx-auto px-6 pt-16 pb-24 grid md:grid-cols-2 gap-12 items-center">
+  <div>
+    <span class="badge-pill inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold mb-6">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 100% Real Cash Rewards
+    </span>
+    <h1 class="font-display font-extrabold text-4xl sm:text-6xl leading-[1.05] mb-6">
+      Play Simple Games.<br>
+      <span class="bg-gradient-to-r from-green via-greenlight to-gold bg-clip-text text-transparent">Win Real Cash.</span>
+    </h1>
+    <p class="text-white/60 text-base sm:text-lg max-w-md mb-8">
+      <!-- Replace hero subtitle here -->
+      HS Gaming turns your spare minutes into real prize money — trivia, spin, and quick-play games, with instant withdrawals to your account.
+    </p>
+    <div class="flex flex-wrap items-center gap-4">
+      <a href="#" class="redirect-btn btn-primary rounded-full px-7 py-3.5 inline-flex items-center gap-2">
+        <i data-lucide="download" class="w-4 h-4"></i> Download Free
+      </a>
+      <a href="#" class="redirect-btn btn-ghost rounded-full px-7 py-3.5 inline-flex items-center gap-2 text-white/80">
+        <i data-lucide="play" class="w-4 h-4"></i> Watch Demo
+      </a>
+    </div>
+    <p class="text-white/35 text-xs mt-6">18+ only · Skill-based gameplay · Please check your state's eligibility before playing</p>
+  </div>
+
+  <div class="flex justify-center">
+    <div class="phone-mock float">
+      <div class="phone-notch"></div>
+      <div class="p-5 pt-9 h-full flex flex-col">
+        <p class="text-white/40 text-[10px] tracking-widest uppercase mb-1">Your balance</p>
+        <p class="font-display font-extrabold text-3xl text-greenlight mb-6">₹4,250.00</p>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="card rounded-xl p-3">
+            <i data-lucide="brain" class="w-5 h-5 text-violet mb-2"></i>
+            <p class="text-xs font-semibold">Trivia Rush</p>
+          </div>
+          <div class="card rounded-xl p-3">
+            <i data-lucide="disc-3" class="w-5 h-5 text-gold mb-2"></i>
+            <p class="text-xs font-semibold">Spin & Win</p>
+          </div>
+        </div>
+        <div class="card rounded-xl p-3 flex-1 flex flex-col justify-center items-center text-center">
+          <i data-lucide="trophy" class="w-7 h-7 text-gold mb-2"></i>
+          <p class="text-xs text-white/50">Today's Prize Pool</p>
+          <p class="font-display font-bold text-lg">₹50,000</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STATS STRIP ================= -->
+<section class="relative border-y border-white/5 bg-panel/40">
+  <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
+    <!-- Replace these with your real, verified numbers -->
+    <div class="text-center py-10 px-3">
+      <div class="stat-num text-3xl sm:text-4xl text-green">10L+</div>
+      <div class="text-xs text-white/45 mt-2">Downloads</div>
+    </div>
+    <div class="text-center py-10 px-3">
+      <div class="stat-num text-3xl sm:text-4xl text-gold">₹2Cr+</div>
+      <div class="text-xs text-white/45 mt-2">Paid Out</div>
+    </div>
+    <div class="text-center py-10 px-3">
+      <div class="stat-num text-3xl sm:text-4xl text-violet">4.6★</div>
+      <div class="text-xs text-white/45 mt-2">App Rating</div>
+    </div>
+    <div class="text-center py-10 px-3">
+      <div class="stat-num text-3xl sm:text-4xl text-greenlight">24/7</div>
+      <div class="text-xs text-white/45 mt-2">Instant Withdrawals</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how-it-works" class="relative max-w-6xl mx-auto px-6 py-24">
+  <div class="text-center mb-14">
+    <p class="text-green text-xs font-bold uppercase tracking-widest mb-3">Getting Started</p>
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl">How HS Gaming Works</h2>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="card rounded-2xl p-6">
+      <div class="w-10 h-10 rounded-full bg-green/15 text-green flex items-center justify-center font-display font-bold mb-4">1</div>
+      <h3 class="font-display font-semibold text-lg mb-1">Download the App</h3>
+      <p class="text-white/50 text-sm">Free to install, ready to play in under a minute.</p>
+    </div>
+    <div class="card rounded-2xl p-6">
+      <div class="w-10 h-10 rounded-full bg-gold/15 text-gold flex items-center justify-center font-display font-bold mb-4">2</div>
+      <h3 class="font-display font-semibold text-lg mb-1">Pick a Game</h3>
+      <p class="text-white/50 text-sm">Trivia, spin wheel, or quick quiz battles — your call.</p>
+    </div>
+    <div class="card rounded-2xl p-6">
+      <div class="w-10 h-10 rounded-full bg-violet/15 text-violet flex items-center justify-center font-display font-bold mb-4">3</div>
+      <h3 class="font-display font-semibold text-lg mb-1">Play & Score</h3>
+      <p class="text-white/50 text-sm">Climb the leaderboard, top scorers win the prize pool.</p>
+    </div>
+    <div class="card rounded-2xl p-6">
+      <div class="w-10 h-10 rounded-full bg-greenlight/15 text-greenlight flex items-center justify-center font-display font-bold mb-4">4</div>
+      <h3 class="font-display font-semibold text-lg mb-1">Withdraw Instantly</h3>
+      <p class="text-white/50 text-sm">Cash out straight to your bank or UPI, anytime.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GAMES ================= -->
+<section id="games" class="relative max-w-6xl mx-auto px-6 py-24">
+  <div class="text-center mb-14">
+    <p class="text-gold text-xs font-bold uppercase tracking-widest mb-3">Choose Your Game</p>
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl">Something for Every Kind of Player</h2>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="card rounded-2xl p-7 hover:-translate-y-1 transition-transform">
+      <i data-lucide="brain" class="w-8 h-8 text-violet mb-4"></i>
+      <h3 class="font-display font-semibold text-xl mb-2">Trivia Rush</h3>
+      <p class="text-white/50 text-sm">Answer general-knowledge questions faster than the clock — every correct answer adds to your score.</p>
+    </div>
+    <div class="card rounded-2xl p-7 hover:-translate-y-1 transition-transform">
+      <i data-lucide="disc-3" class="w-8 h-8 text-gold mb-4"></i>
+      <h3 class="font-display font-semibold text-xl mb-2">Spin & Win</h3>
+      <p class="text-white/50 text-sm">One spin a day, guaranteed reward every time — bigger prizes on longer streaks.</p>
+    </div>
+    <div class="card rounded-2xl p-7 hover:-translate-y-1 transition-transform">
+      <i data-lucide="swords" class="w-8 h-8 text-green mb-4"></i>
+      <h3 class="font-display font-semibold text-xl mb-2">1v1 Quiz Battle</h3>
+      <p class="text-white/50 text-sm">Challenge a random player in real time — winner takes the pot.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REWARDS ================= -->
+<section id="rewards" class="relative max-w-5xl mx-auto px-6 py-24 text-center">
+  <p class="text-violet text-xs font-bold uppercase tracking-widest mb-3">Prize Pool</p>
+  <h2 class="font-display font-extrabold text-3xl sm:text-4xl mb-14">Today's Top Rewards</h2>
+  <div class="grid sm:grid-cols-3 gap-6">
+    <div class="card rounded-2xl p-8 border-gold/30" style="border-width:1px;">
+      <i data-lucide="crown" class="w-8 h-8 text-gold mx-auto mb-4"></i>
+      <p class="text-white/45 text-xs uppercase tracking-wide mb-2">1st Place</p>
+      <p class="font-display font-extrabold text-3xl text-gold">₹15,000</p>
+    </div>
+    <div class="card rounded-2xl p-8">
+      <i data-lucide="medal" class="w-8 h-8 text-white/60 mx-auto mb-4"></i>
+      <p class="text-white/45 text-xs uppercase tracking-wide mb-2">2nd Place</p>
+      <p class="font-display font-extrabold text-3xl">₹7,500</p>
+    </div>
+    <div class="card rounded-2xl p-8">
+      <i data-lucide="medal" class="w-8 h-8 text-white/40 mx-auto mb-4"></i>
+      <p class="text-white/45 text-xs uppercase tracking-wide mb-2">3rd Place</p>
+      <p class="font-display font-extrabold text-3xl">₹3,000</p>
+    </div>
+  </div>
+  <p class="text-white/35 text-xs mt-8">Prize amounts are illustrative — replace with your live prize pool figures.</p>
+</section>
+
+<!-- ================= TESTIMONIALS ================= -->
+<section class="relative max-w-6xl mx-auto px-6 py-24">
+  <div class="text-center mb-14">
+    <p class="text-green text-xs font-bold uppercase tracking-widest mb-3">Player Stories</p>
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl">What Players Are Saying</h2>
+    <p class="text-white/40 text-sm mt-3">Placeholder quotes below — swap these for genuine, verifiable player reviews before launch.</p>
+  </div>
+  <div class="grid sm:grid-cols-3 gap-6">
+    <div class="card rounded-2xl p-6">
+      <div class="flex gap-1 text-gold mb-3">★★★★★</div>
+      <p class="text-white/60 text-sm mb-4">"Replace this with a real, verifiable quote from an actual player."</p>
+      <p class="text-white/40 text-xs">— Player name, City</p>
+    </div>
+    <div class="card rounded-2xl p-6">
+      <div class="flex gap-1 text-gold mb-3">★★★★★</div>
+      <p class="text-white/60 text-sm mb-4">"Replace this with a real, verifiable quote from an actual player."</p>
+      <p class="text-white/40 text-xs">— Player name, City</p>
+    </div>
+    <div class="card rounded-2xl p-6">
+      <div class="flex gap-1 text-gold mb-3">★★★★★</div>
+      <p class="text-white/60 text-sm mb-4">"Replace this with a real, verifiable quote from an actual player."</p>
+      <p class="text-white/40 text-xs">— Player name, City</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq" class="relative max-w-3xl mx-auto px-6 py-24">
+  <div class="text-center mb-12">
+    <p class="text-gold text-xs font-bold uppercase tracking-widest mb-3">Questions</p>
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl">Frequently Asked</h2>
+  </div>
+  <div class="space-y-3">
+    <details class="faq-item card rounded-xl px-5 py-4" open>
+      <summary class="flex items-center justify-between font-semibold">
+        Is HS Gaming free to play?
+        <i data-lucide="chevron-down" class="chev w-4 h-4 text-white/40 transition-transform"></i>
+      </summary>
+      <p class="text-white/55 text-sm mt-3">Yes — downloading and playing is free. Some games offer optional paid entries for bigger prize pools.</p>
+    </details>
+    <details class="faq-item card rounded-xl px-5 py-4">
+      <summary class="flex items-center justify-between font-semibold">
+        How do withdrawals work?
+        <i data-lucide="chevron-down" class="chev w-4 h-4 text-white/40 transition-transform"></i>
+      </summary>
+      <p class="text-white/55 text-sm mt-3"><!-- Replace with your actual withdrawal process -->Winnings go straight to your linked bank account or UPI ID, usually within 24 hours of a payout request.</p>
+    </details>
+    <details class="faq-item card rounded-xl px-5 py-4">
+      <summary class="flex items-center justify-between font-semibold">
+        Is this legal in my state?
+        <i data-lucide="chevron-down" class="chev w-4 h-4 text-white/40 transition-transform"></i>
+      </summary>
+      <p class="text-white/55 text-sm mt-3"><!-- Replace with your actual legal/compliance copy -->Skill-based real-money gaming is regulated differently across states. Please check local regulations before playing — see our full Terms & Conditions.</p>
+    </details>
+    <details class="faq-item card rounded-xl px-5 py-4">
+      <summary class="flex items-center justify-between font-semibold">
+        Is my data and money safe?
+        <i data-lucide="chevron-down" class="chev w-4 h-4 text-white/40 transition-transform"></i>
+      </summary>
+      <p class="text-white/55 text-sm mt-3">All transactions are encrypted, and payouts are processed through verified payment partners.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ================= DOWNLOAD CTA ================= -->
+<section id="download" class="relative max-w-4xl mx-auto px-6 py-24 text-center">
+  <div class="card rounded-3xl p-12 sm:p-16">
+    <i data-lucide="rocket" class="w-9 h-9 text-green mx-auto mb-6"></i>
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl mb-4">Ready to Start Winning?</h2>
+    <p class="text-white/55 max-w-md mx-auto mb-8">Join HS Gaming today and turn a few free minutes into real rewards.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="#" class="redirect-btn btn-primary rounded-full px-8 py-3.5 inline-flex items-center gap-2">
+        <i data-lucide="apple" class="w-4 h-4"></i> App Store
+      </a>
+      <a href="#" class="redirect-btn btn-ghost rounded-full px-8 py-3.5 inline-flex items-center gap-2">
+        <i data-lucide="play-circle" class="w-4 h-4"></i> Google Play
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="relative border-t border-white/5 py-12 px-6">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+    <a href="#top" class="font-display font-extrabold text-xl">HS <span class="text-green">Gaming</span></a>
+    <div class="flex flex-wrap justify-center gap-6 text-xs text-white/40">
+      <!-- Replace these legal links with your real pages -->
+      <a href="#" class="hover:text-white/70 transition-colors">Terms & Conditions</a>
+      <a href="#" class="hover:text-white/70 transition-colors">Privacy Policy</a>
+      <a href="#" class="hover:text-white/70 transition-colors">Responsible Gaming</a>
+      <a href="#" class="hover:text-white/70 transition-colors">Contact</a>
+    </div>
+  </div>
+  <p class="text-center text-white/25 text-[11px] mt-8 max-w-2xl mx-auto leading-relaxed">
+    <!-- Replace with your actual compliance disclaimer -->
+    18+ only. This app involves elements of skill and may not be available in all states/regions.
+    Please play responsibly and review your local laws before participating.
+    © <span id="footer-year"></span> HS Gaming. All rights reserved.
+  </p>
+</footer>
+
+<script>
+  lucide.createIcons();
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+  // --- Where every CTA button (Play Now, Download Free, Watch Demo, App Store,
+  // Google Play) should send the visitor. Replace with your actual filename if
+  // it's different — both files need to sit in the same folder.
+  const REDIRECT_URL = "special.html";
+
+  document.querySelectorAll('.redirect-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      try { sessionStorage.setItem('cameFromGame', '1'); } catch (err) {}
+      window.location.href = REDIRECT_URL;
+    });
+  });
+
+  // Mobile-friendly FAQ: keep only one open at a time
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.addEventListener('toggle', () => {
+      if (item.open){
+        document.querySelectorAll('.faq-item').forEach(other => {
+          if (other !== item) other.removeAttribute('open');
+        });
+      }
+    });
+  });
+</script>
+</body>
+</html>
